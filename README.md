@@ -1,3 +1,3 @@
 # RadonDetector
 
-Radon detector based on silicon PIN diode.
+Radon detector based on a silicon PIN diode
