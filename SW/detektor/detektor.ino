@@ -2,15 +2,15 @@
 
 int sensorValue = 0;            
 uint16_t range[256]; 
-int LED = 1; 
+int LEDPin = 1; 
 int analogInPin = PA0_PIN; 
 int tracePin = PB0_PIN; 
 
 ISR(TIMER1_COMPA_vect)
 {
   noInterrupts();
-  LED ^= 1; 
-  digitalWrite(PC7_PIN,LED); 
+  LEDPin ^= 1; 
+  digitalWrite(PC7_PIN,LEDPin); 
   interrupts();
 }
 
