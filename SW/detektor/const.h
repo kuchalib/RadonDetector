@@ -1,6 +1,5 @@
 #pragma once
 
-
 // pin layout
 #define PB0_PIN 0
 #define PB1_PIN 1
@@ -34,3 +33,18 @@
 #define PA5_PIN 29
 #define PA6_PIN 30
 #define PA7_PIN 31
+
+
+
+/*
+CD/DATA3 (CS) - PD4
+CMD (MOSI)- PB3
+CLK (CLK) - PB5
+DAT0 (MISO) - PB4
+detect - PB2
+*/
+
+const int CDDATA3 = PC2_PIN; // CS
+const int CMD = PB5_PIN;  // MOSI
+const int CLK = PB7_PIN;  // CLK
+const int DAT0 = PB6_PIN; // MISO
