@@ -29,6 +29,7 @@ void setTimer()
   TIMSK1 = 0b00000010;
 }
 
+// OBSOLETE
 void fallingEdgeDetector(int pin)
 {
   int states[3][2] = { {0,1},{2,1},{2,2} }; 
@@ -57,28 +58,36 @@ bool fileWrite(const char * fileName, const char * text)
 }
 
 void setup() {
-  
+  // Init serial line
   Serial.begin(9600);
-  fallingEdgeDetector(tracePin);
+
+  // Init trace pin
   pinMode(PC7_PIN,OUTPUT); 
   digitalWrite(PC7_PIN, HIGH);   
+
+  // Init timer
   noInterrupts();
   setTimer(); 
   interrupts();
 
+  // Reset range array
   for (int i = 0; i < 256; i++)
   {
     range[i] = 0; 
   }
 
+
+  // Init SD card reader
   if (!SD.begin(CDDATA3))
     Serial.println("Card reader error"); 
+
+  // Generate pseudo-unique file name
   randomSeed(analogRead(PA0_PIN)); 
-  
   long rnd = random(1, 10000); 
   snprintf(file, 99, "%ld.csv", rnd); 
-  Serial.println(file); 
 }
+
+
 
 void loop() {
   pinMode(tracePin,OUTPUT);
@@ -86,51 +95,39 @@ void loop() {
   //delayMicroseconds(1);
   //digitalWrite(tracePin, LOW); 
 
-  while(true)
-  {
-      pinMode(tracePin, INPUT); 
-      delayMicroseconds(200); 
-      fallingEdgeDetector(tracePin);
-     
-      sensorValue = analogRead(analogInPin);
-      sensorValue >>= 2; 
-      range[sensorValue]++;
-  
-    pinMode(tracePin,OUTPUT);
-    digitalWrite(tracePin, HIGH); 
-    //delayMicroseconds(1);
-    //digitalWrite(tracePin, LOW); 
-  }
   for(uint16_t i = 0; i < 65000; i++)
   {
     pinMode(tracePin, INPUT); 
-    delayMicroseconds(200); 
-    //fallingEdgeDetector(tracePin);  
-    int val; 
-    
+    delayMicroseconds(200);     
+
+    // falling edge detector
     while(digitalRead(tracePin) == 0); 
     while(digitalRead(tracePin) == 1);
+    
     sensorValue = analogRead(analogInPin);
     sensorValue >>= 2; 
     range[sensorValue]++;
-     //  Serial.println("sestupna");  
   
     pinMode(tracePin,OUTPUT);
     digitalWrite(tracePin, HIGH); 
-    //delayMicroseconds(1);
-    //digitalWrite(tracePin, LOW); 
-
   }
-  
-  char buf[1600]; 
-  buf[0] = 0; 
+
+  // preparation of the string to write
+  char buf[1600];  // 1600 bytes is enough for 256*6 + 3 chars
+  buf[0] = 0; // zeroing the string
+
+  // write data to buffer
   for(int i = 0; i < 256; i++)
   {
-     sprintf(buf + strlen(buf),"%d;",range[i]); 
+     sprintf(buf + strlen(buf),"%u;",range[i]); 
   }
+  
+  // Windows-style newline
   sprintf(buf + strlen(buf), "\r\n"); 
   fileWrite(file, buf); 
-
+  
+  
+  // Reset range array
   for (int i = 0; i < 256; i++)
   {
     range[i] = 0; 
