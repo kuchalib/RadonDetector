@@ -1,4 +1,5 @@
 #include "const.h"
+#include <string.h>
 #include <SD.h>
 
 int sensorValue = 0;            
@@ -87,7 +88,33 @@ void setup() {
   snprintf(file, 99, "%ld.csv", rnd); 
 }
 
-
+// Need to test this function
+void GetBuildTime(SyncDate * syncDate)
+{
+  char buildDate[] = __DATE__ " " __TIME__;
+  
+  char * buildDateSplitted = strtok(buildDate, " ");
+  int month = -1;
+  for (int i = 0; i < 12; i++)
+  {
+    // Get month
+    if (!strcmp(buildDateSplitted, months[i]))
+    {
+      month = i + 1;
+      break; 
+    }
+  }
+  ((int*)syncDate)[0] = month; 
+  int i = 1;
+  buildDateSplitted = strtok(NULL, " ");
+  while (buildDateSplitted != NULL)
+  {
+    // Get day, year, hour, minute and second
+    ((int*)syncDate)[i] = atoi(buildDateSplitted);
+    ++i; 
+    buildDateSplitted = strtok(NULL, " :");
+  }
+}
 
 void loop() {
   pinMode(tracePin,OUTPUT);

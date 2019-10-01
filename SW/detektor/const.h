@@ -34,17 +34,49 @@
 #define PA6_PIN 30
 #define PA7_PIN 31
 
+// Buildtime months options:
+const char months[12][4] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+
+// Placeholder for the RTC sync time, do not change the order of the items!
+struct SyncDate
+{
+  int month;
+  int day;
+  int year;
+  int hour;
+  int minute;
+  int sec;
+};
 
 
 /*
+------------------------------------
+-----------SD CARD READER-----------
+------------------------------------
+
 CD/DATA3 (CS) - PD4
 CMD (MOSI)- PB3
 CLK (CLK) - PB5
 DAT0 (MISO) - PB4
 detect - PB2
+
 */
 
 const int CDDATA3 = PC2_PIN; // CS
 const int CMD = PB5_PIN;  // MOSI
 const int CLK = PB7_PIN;  // CLK
 const int DAT0 = PB6_PIN; // MISO
+
+/* ----------------------------------*/
+
+/*
+------------------------------------
+-------------RTC MODULE-------------
+------------------------------------
+*/
+
+const int I2C_SCL = PC0_PIN;
+const int I2C_SDA = PC1_PIN; 
+ 
+/*----------------------------------*/
+
