@@ -96,8 +96,8 @@ void setup() {
   RTC.begin(); 
   dateTime = RTC.getDateTime();
   SyncDate buildTime;
-  GetBuildTime(&buildTime); 
-  if((uint16_t)buildTime.year < dateTime.year || (uint8_t)buildTime.month < dateTime.month || (uint8_t)buildTime.day < dateTime.day || (uint8_t)buildTime.hour < dateTime.hour || (uint8_t)buildTime.minute < dateTime.minute || (uint8_t)buildTime.sec < dateTime.second)
+  GetBuildTime(&buildTime);  
+  if((uint16_t)buildTime.year > dateTime.year || (uint8_t)buildTime.month > dateTime.month || (uint8_t)buildTime.day > dateTime.day || (uint8_t)buildTime.hour > dateTime.hour || (uint8_t)buildTime.minute > dateTime.minute)
   {
     // (pseudo)protection of time update after normal setup
     Serial.println("Time synchronization");
