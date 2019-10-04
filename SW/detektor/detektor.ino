@@ -1,4 +1,5 @@
 #include "const.h"
+#include "DS3231.h"
 #include <string.h>
 #include <SD.h>
 
@@ -8,6 +9,9 @@ int LEDPin = 1;
 int analogInPin = PA0_PIN; 
 int tracePin = PB0_PIN;
 char file[100];  
+DS3231 RTC; 
+RTCDateTime dateTime; 
+char buf[1600];  // 1600 bytes is enough for 256*6 + 3 chars
 
 ISR(TIMER1_COMPA_vect)
 {
@@ -58,36 +62,6 @@ bool fileWrite(const char * fileName, const char * text)
   
 }
 
-void setup() {
-  // Init serial line
-  Serial.begin(9600);
-
-  // Init trace pin
-  pinMode(PC7_PIN,OUTPUT); 
-  digitalWrite(PC7_PIN, HIGH);   
-
-  // Init timer
-  noInterrupts();
-  setTimer(); 
-  interrupts();
-
-  // Reset range array
-  for (int i = 0; i < 256; i++)
-  {
-    range[i] = 0; 
-  }
-
-
-  // Init SD card reader
-  if (!SD.begin(CDDATA3))
-    Serial.println("Card reader error"); 
-
-  // Generate pseudo-unique file name
-  randomSeed(analogRead(PA0_PIN)); 
-  long rnd = random(1, 10000); 
-  snprintf(file, 99, "%ld.csv", rnd); 
-}
-
 // Need to test this function
 void GetBuildTime(SyncDate * syncDate)
 {
@@ -116,6 +90,54 @@ void GetBuildTime(SyncDate * syncDate)
   }
 }
 
+void setup() {
+  // Init serial line
+  Serial.begin(9600);
+  RTC.begin(); 
+  dateTime = RTC.getDateTime();
+  SyncDate buildTime;
+  GetBuildTime(&buildTime); 
+  if((uint16_t)buildTime.year < dateTime.year || (uint8_t)buildTime.month < dateTime.month || (uint8_t)buildTime.day < dateTime.day || (uint8_t)buildTime.hour < dateTime.hour || (uint8_t)buildTime.minute < dateTime.minute || (uint8_t)buildTime.sec < dateTime.second)
+  {
+    // (pseudo)protection of time update after normal setup
+    Serial.println("Time synchronization");
+    RTC.setDateTime((uint16_t)buildTime.year, (uint8_t)buildTime.month, (uint8_t)buildTime.day, (uint8_t)buildTime.hour, (uint8_t)buildTime.minute, (uint8_t)buildTime.sec); 
+  }
+  // Init trace pin
+  pinMode(PC7_PIN,OUTPUT); 
+  digitalWrite(PC7_PIN, HIGH);   
+
+  // Init timer
+  noInterrupts();
+  setTimer(); 
+  interrupts();
+
+  // Reset range array
+  for (int i = 0; i < 256; i++)
+  {
+    range[i] = 0; 
+  }
+
+
+  // Init SD card reader
+  if (!SD.begin(CDDATA3))
+    Serial.println("Card reader error"); 
+
+  // Generate pseudo-unique file name
+  randomSeed(analogRead(PA0_PIN)); 
+  long rnd = random(1, 10000); 
+  snprintf(file, 99, "%ld.csv", rnd); 
+  
+  dateTime = RTC.getDateTime();
+  snprintf(buf, 200, "%u.%u.%u %u:%u:%u", dateTime.day, dateTime.month, dateTime.year, dateTime.hour, dateTime.minute, dateTime.second); 
+  Serial.println(buf);
+  
+  
+  
+}
+
+
+
 void loop() {
   pinMode(tracePin,OUTPUT);
   digitalWrite(tracePin, HIGH); 
@@ -140,7 +162,7 @@ void loop() {
   }
 
   // preparation of the string to write
-  char buf[1600];  // 1600 bytes is enough for 256*6 + 3 chars
+
   buf[0] = 0; // zeroing the string
 
   // write data to buffer
