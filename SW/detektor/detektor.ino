@@ -8,10 +8,10 @@ uint16_t range[256];
 int LEDPin = 1; 
 int analogInPin = PA0_PIN; 
 int tracePin = PB0_PIN;
-char file[100];  
+char file[40];  
 DS3231 RTC; 
 RTCDateTime dateTime; 
-char buf[1600];  // 1600 bytes is enough for 256*6 + 3 chars
+char buf[1650];  // 1650 bytes is enough for date + 256*6 + 3 chars
 
 ISR(TIMER1_COMPA_vect)
 {
@@ -123,16 +123,10 @@ void setup() {
   if (!SD.begin(CDDATA3))
     Serial.println("Card reader error"); 
 
-  // Generate pseudo-unique file name
-  randomSeed(analogRead(PA0_PIN)); 
-  long rnd = random(1, 10000); 
-  snprintf(file, 99, "%ld.csv", rnd); 
-  
   dateTime = RTC.getDateTime();
-  snprintf(buf, 200, "%u.%u.%u %u:%u:%u", dateTime.day, dateTime.month, dateTime.year, dateTime.hour, dateTime.minute, dateTime.second); 
+  snprintf(file,40,"%u-%02u-%02u_%02u-%02u-%02u.csv",dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute, dateTime.second);
+  snprintf(buf, 200, "System time: %02u.%02u.%u %02u:%02u:%02u", dateTime.day, dateTime.month, dateTime.year, dateTime.hour, dateTime.minute, dateTime.second); 
   Serial.println(buf);
-  
-  
   
 }
 
@@ -164,7 +158,10 @@ void loop() {
   // preparation of the string to write
 
   buf[0] = 0; // zeroing the string
-
+  dateTime = RTC.getDateTime();
+  // Czech date format
+  sprintf(buf,"%02u.%02u.%u %02u:%02u:%02u;", dateTime.day, dateTime.month, dateTime.year, dateTime.hour, dateTime.minute, dateTime.second); 
+  
   // write data to buffer
   for(int i = 0; i < 256; i++)
   {
