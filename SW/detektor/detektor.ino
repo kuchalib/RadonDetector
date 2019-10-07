@@ -8,7 +8,7 @@ uint16_t range[256];
 int LEDPin = 1; 
 int analogInPin = PA0_PIN; 
 int tracePin = PB0_PIN;
-char file[40];  
+char file[9];  
 DS3231 RTC; 
 RTCDateTime dateTime; 
 char buf[1650];  // 1650 bytes is enough for date + 256*6 + 3 chars
@@ -123,8 +123,12 @@ void setup() {
   if (!SD.begin(CDDATA3))
     Serial.println("Card reader error"); 
 
+  // Generate pseudo-unique file name
+  randomSeed(analogRead(PA0_PIN));
+  long rnd = random(1, 10000); 
+  snprintf(file, 9, "%ld.csv", rnd); 
+  
   dateTime = RTC.getDateTime();
-  snprintf(file,40,"%u-%02u-%02u_%02u-%02u-%02u.csv",dateTime.year, dateTime.month, dateTime.day, dateTime.hour, dateTime.minute, dateTime.second);
   snprintf(buf, 200, "System time: %02u.%02u.%u %02u:%02u:%02u", dateTime.day, dateTime.month, dateTime.year, dateTime.hour, dateTime.minute, dateTime.second); 
   Serial.println(buf);
   
